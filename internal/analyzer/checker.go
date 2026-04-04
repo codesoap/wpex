@@ -14,7 +14,7 @@ type macChecker struct {
 }
 
 func (c *macChecker) cookie(addr net.UDPAddr) [16]byte {
-	ticks := uint64(time.Now().Sub(c.start) / (time.Duration(120) * time.Minute))
+	ticks := uint64(time.Since(c.start) / (120 * time.Minute))
 	addrBytes, _ := addr.AddrPort().MarshalBinary()
 	return mac32(nil, c.secret, binary.BigEndian.AppendUint64(nil, ticks), addrBytes)
 }

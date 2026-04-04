@@ -2,7 +2,6 @@ package relay
 
 import (
 	"context"
-	"fmt"
 	"github.com/weiiwang01/wpex/internal/analyzer"
 	"golang.org/x/time/rate"
 	"log"
@@ -36,11 +35,9 @@ func (r *Relay) relay(conn *net.UDPConn) {
 		packet := buf[:n]
 		peers, send := r.analyzer.Analyse(packet, *remoteAddr)
 		for _, peer := range peers {
-			if len(peers) > 1 {
-				if !r.limit.Allow() {
-					slog.Warn("broadcast rate limit exceeded", "src", remoteAddr.String(), "dst", peer.String())
-					continue
-				}
+			if !r.limit.Allow() {
+				slog.Warn("broadcast rate limit exceeded", "src", remoteAddr.String(), "dst", peer.String())
+				continue
 			}
 			_, err := conn.WriteToUDP(send, &peer)
 			if err != nil {
@@ -70,7 +67,7 @@ func Start(address string, publicKeys [][]byte, broadcastLimit *rate.Limiter) {
 	for i := 0; i < runtime.NumCPU(); i++ {
 		l, err := lc.ListenPacket(context.Background(), "udp", address)
 		if err != nil {
-			log.Fatal(fmt.Sprintf("failed to listen on %s: %s", address, err))
+			log.Fatalf("failed to listen on %s: %s", address, err)
 		}
 		conn := l.(*net.UDPConn)
 		go relay.relay(conn)

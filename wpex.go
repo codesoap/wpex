@@ -49,7 +49,7 @@ func main() {
 	for _, allow := range allows {
 		k, err := base64.StdEncoding.DecodeString(allow)
 		if err != nil || len(k) != 32 {
-			log.Fatal(fmt.Sprintf("invalid wireguard public key: '%s'", allow))
+			log.Fatalf("invalid wireguard public key: '%s'", allow)
 		}
 		logger.Debug("allow wireguard public key", "key", allow)
 		allowKeys = append(allowKeys, k)
